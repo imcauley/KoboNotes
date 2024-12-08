@@ -1,5 +1,4 @@
 import sqlite3
-from pprint import pprint
 import inquirer
 
 def highlights_from_book(cur, contentID):
@@ -44,6 +43,14 @@ def book_list(cur):
 
     return cur.execute(sql).fetchall()
 
+def export_notes(book_name, author_name, highlights):
+    file_text = f"# {book_name}\n"\
+        f"## {author_name}\n\n" + \
+        "\n\n --- \n\n".join(highlights)
+    
+    with open(f"{book_name}.md", "a") as f:
+        f.write(file_text)
+
 dbfile = './2023-01-06.sqlite'
 con = sqlite3.connect(dbfile)
 cur = con.cursor()
@@ -74,8 +81,7 @@ questions = [
 answers = inquirer.prompt(questions)
 
 for ans in answers["books"]:
-    print(ans)
-    highlights = [h[1] for h in highlights_from_book(cur, ans)]
-    print(highlights)
+    highlights = [h[1].strip() for h in highlights_from_book(cur, ans)]
+    export_notes(books[ans][1], books[ans][2], highlights)
 
 con.close()
