@@ -1,3 +1,4 @@
+import argparse
 import sqlite3
 import inquirer
 
@@ -51,37 +52,38 @@ def export_notes(book_name, author_name, highlights):
     with open(f"{book_name}.md", "a") as f:
         f.write(file_text)
 
-dbfile = './2023-01-06.sqlite'
-con = sqlite3.connect(dbfile)
-cur = con.cursor()
-
-# highlights = highlights_from_book(cur, 'file:///mnt/onboard/.kobo/dropbox/Frying_Plantain_(Zalika_Reid-Benta)_(z-lib.org).epub')
-# print(highlights)
-
-# reading all table names
-# table_list = [a for a in cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
-# here is you table list
-# print(table_list)
-book_list = book_list(cur)
-books = {b[0]: b for b in book_list}
-options = [(f"{b[1]} - {b[2]}", b[0]) for b in book_list]
-# book = book_list(cur)[0][0]
-# print(highlights_from_book(cur, book))
-
-# Be sure to close the connection
+    RESET = '\033[39;49m'
+    R  = '\033[31m'
+    print(f"Exported {R} {book_name}.md {RESET}")
 
 
-questions = [
-    inquirer.Checkbox(
-        "books",
-        message="Select Books to Export Notes For",
-        choices=options
-    ),
-]
-answers = inquirer.prompt(questions)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+                    prog='Kobo Highlight Exporter',
+                    description='A tool to export kobo highlights',
+    )
+    parser.add_argument('filename') 
+    arguments = parser.parse_args()
 
-for ans in answers["books"]:
-    highlights = [h[1].strip() for h in highlights_from_book(cur, ans)]
-    export_notes(books[ans][1], books[ans][2], highlights)
+    dbfile = arguments.filename
+    con = sqlite3.connect(dbfile)
+    cur = con.cursor()
 
-con.close()
+    book_list = book_list(cur)
+    books = {b[0]: b for b in book_list}
+    options = [(f"{b[1]} - {b[2]}", b[0]) for b in book_list]
+
+    questions = [
+        inquirer.Checkbox(
+            "books",
+            message="Select Books to Export Notes For",
+            choices=options
+        ),
+    ]
+    answers = inquirer.prompt(questions)
+
+    for ans in answers["books"]:
+        highlights = [h[1].strip() for h in highlights_from_book(cur, ans)]
+        export_notes(books[ans][1], books[ans][2], highlights)
+
+    con.close()
