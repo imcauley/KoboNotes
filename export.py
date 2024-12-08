@@ -1,4 +1,6 @@
 import sqlite3
+from pprint import pprint
+import inquirer
 
 def highlights_from_book(cur, contentID):
     sql = "SELECT '#' || row_number() OVER (PARTITION BY B.Title ORDER BY T.ChapterProgress, T.DateModified) AS row_number, "\
@@ -50,9 +52,20 @@ cur = con.cursor()
 # table_list = [a for a in cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
 # here is you table list
 # print(table_list)
-# print(book_list(cur))
+options = [(f"{b[1]} - {b[2]}", b[0]) for b in book_list(cur)]
 # book = book_list(cur)[0][0]
 # print(highlights_from_book(cur, book))
 
 # Be sure to close the connection
 con.close()
+questions = [
+    inquirer.Checkbox(
+        "interests",
+        message="Select Books to Export Notes For",
+        choices=options
+    ),
+]
+
+answers = inquirer.prompt(questions)
+
+pprint(answers)
