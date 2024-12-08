@@ -2,6 +2,8 @@
 
 A small commandline tool to export highlights from a Kobo sqlite file
 
+![Demo](https://github.com/imcauley/KoboNotes/blob/main/demo.gif?raw=true)
+
 ## Usage
 
 Install from requirements.txt
