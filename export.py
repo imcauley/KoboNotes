@@ -48,24 +48,34 @@ dbfile = './2023-01-06.sqlite'
 con = sqlite3.connect(dbfile)
 cur = con.cursor()
 
+# highlights = highlights_from_book(cur, 'file:///mnt/onboard/.kobo/dropbox/Frying_Plantain_(Zalika_Reid-Benta)_(z-lib.org).epub')
+# print(highlights)
+
 # reading all table names
 # table_list = [a for a in cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
 # here is you table list
 # print(table_list)
-options = [(f"{b[1]} - {b[2]}", b[0]) for b in book_list(cur)]
+book_list = book_list(cur)
+books = {b[0]: b for b in book_list}
+options = [(f"{b[1]} - {b[2]}", b[0]) for b in book_list]
 # book = book_list(cur)[0][0]
 # print(highlights_from_book(cur, book))
 
 # Be sure to close the connection
-con.close()
+
+
 questions = [
     inquirer.Checkbox(
-        "interests",
+        "books",
         message="Select Books to Export Notes For",
         choices=options
     ),
 ]
-
 answers = inquirer.prompt(questions)
 
-pprint(answers)
+for ans in answers["books"]:
+    print(ans)
+    highlights = [h[1] for h in highlights_from_book(cur, ans)]
+    print(highlights)
+
+con.close()
